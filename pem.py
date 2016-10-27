@@ -284,3 +284,8 @@ ax.set_ylim(gpp_min_list[0], gpp_max_list[0])
 ax.set_ylabel('Daily GPP (kg C/m2/day)')
 ax.set_xlabel('Daily NPP (kg C/m2/day)')
 plt.title('NPP vs GPP, EBF')
+
+# OR USING SEABORN...Regression plot, or joint plot
+sns.regplot(EBF['daily_npp'], EBF['daily_gpp'])
+sns.jointplot(OSL['daily_npp'], OSL['daily_gpp'], kind='reg')
+sns.jointplot(CL['daily_npp'], CL['daily_gpp'], kind='reg')
