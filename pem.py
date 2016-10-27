@@ -7,6 +7,7 @@
 
 import numpy as np
 import pandas as pd
+import seaborn as sns
 import os
 import matplotlib.pyplot as plt
 from sklearn.neighbors import KernelDensity
@@ -198,6 +199,7 @@ npp_min_list = np.array((EBF['daily_npp'].min(), OSL['daily_npp'].min(), CL['dai
 npp_max_list = np.array((EBF['daily_npp'].max(), OSL['daily_npp'].max(), CL['daily_npp'].max()))
 npp_min = npp_min_list.min()
 npp_max = npp_max_list.max()
+
 extra_space = (npp_max - npp_min) * 0.2
 x_grid = np.linspace(npp_min - extra_space, npp_max + extra_space, 1000)
 bandwidth = 0.0001
@@ -214,6 +216,15 @@ ax.plot(x_grid, kde_sklearn(CL['daily_npp'], x_grid, bandwidth=bandwidth),
         label='CL', linewidth=3, alpha=0.5)
 #ax.hist(CL['daily_npp'], 30, fc='gray', histtype='stepfilled', alpha=0.3, normed=True)
 ax.legend(loc='upper right')
+ax.set_ylabel('Modeled Density')
+ax.set_xlabel('Daily NPP (kg C/m2/day)')
+plt.title('Daily NPP distribution by vegetation types')
+
+# OR USE SEABORN AND AVOID ALL THAT CODE, sigh.....!!
+
+ax = sns.distplot(EBF['daily_npp'])
+sns.distplot(OSL['daily_npp'])
+sns.distplot(CL['daily_npp'])
 ax.set_ylabel('Modeled Density')
 ax.set_xlabel('Daily NPP (kg C/m2/day)')
 plt.title('Daily NPP distribution by vegetation types')
