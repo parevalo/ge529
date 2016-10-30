@@ -121,8 +121,6 @@ def get_annual_gr(lut, leaf_gr):
 def pem(veg_file, lut_file):
     """ PEM function """
     biome = int(veg_file.iloc[0, 0])
-    # Subset those as float (they were read as str)
-    fpar_lai = veg_file.iloc[:12, 5:7].astype(float)
     input = veg_file.iloc[:, 1:5]
 
     # Replicate monthly mean to daily
@@ -134,7 +132,7 @@ def pem(veg_file, lut_file):
     # Scale LAI
     input['LAI'] /= 10
     # Get LUT for biome type
-    lut = lutfile.iloc[:, biome-1]
+    lut = lut_file.iloc[:, biome-1]
 
     # Get epsilon, and daily GPP to calculate annual GPP
     e = get_epsilon(lut, input.iloc[:, 2], input.iloc[:, 3])
@@ -175,14 +173,27 @@ lutfile = pd.read_table('./data/LUT.dat', header=0, index_col=0)
 # Get biome names, not used yet but could be useful
 biome_names = lutfile.columns
 
-vegtype2 = pd.read_table('./data/r94c116-2.dat', header=0, index_col=False)
+#dtypes = {'Biome': np.float, 'SWRad': np.float, 'TAvg' : np.float, 'Tmin': np.float, 'VPD' : np.float,
+#        'Fpar' : str, 'LAI' : str} Not working yet
+vegtype2 = pd.read_table('./data/r94c116-2.dat', header=0, index_col=False) # dtype=dtypes)
 vegtype9 = pd.read_table('./data/r115c310-9.dat', header=0, index_col=False)
 vegtype11 = pd.read_table('./data/r40c220-11.dat', header=0, index_col=False)
 
+# Fix dtypes for Fpar and LAI, create a function or something
+vegtype2['LAI'] = pd.to_numeric(vegtype2['LAI'], errors='coerce')
+vegtype2['Fpar'] = pd.to_numeric(vegtype2['LAI'], errors='coerce')
+vegtype9['LAI'] = pd.to_numeric(vegtype9['LAI'], errors='coerce')
+vegtype9['Fpar'] = pd.to_numeric(vegtype9['LAI'], errors='coerce')
+vegtype11['LAI'] = pd.to_numeric(vegtype11['LAI'], errors='coerce')
+vegtype11['Fpar'] = pd.to_numeric(vegtype11['LAI'], errors='coerce')
+
 # Get results
+
 EBF = pem(vegtype2, lutfile)
 OSL = pem(vegtype9, lutfile)
 CL = pem(vegtype11, lutfile)
+
+
 
 # PLOTS 1) Density comparison
 
@@ -289,3 +300,24 @@ plt.title('NPP vs GPP, EBF')
 sns.regplot(EBF['daily_npp'], EBF['daily_gpp'])
 sns.jointplot(OSL['daily_npp'], OSL['daily_gpp'], kind='reg')
 sns.jointplot(CL['daily_npp'], CL['daily_gpp'], kind='reg')
+
+# Changing some variables to compare the results
+
+def change_input(input, lut_file):
+    """ Change input to get results with a range of values"""
+
+    # Create arrays to store results
+    annual_npp = np.zeros((101, 5))
+    annual_gpp = np.zeros((101, 5))
+
+    # Loop over different values
+    for i in range(1, 101):
+        # LAI
+        input['LAI'] *= (1 + (i - 1) / 100)
+        pem_output = pem(input, lut_file)
+        annual_npp[i - 1, 4] = pem_output['annual_npp']
+        annual_gpp[i - 1, 4] = pem_output['annual_gpp']
+
+    return {'annual_npp': annual_npp, 'annual_gpp': annual_gpp}
+
+EBF2 = change_input(vegtype2, lutfile)
