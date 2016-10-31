@@ -353,19 +353,26 @@ def change_input(input, lut_file):
 
 EBF2 = change_input(vegtype2, lutfile)
 
-# Make plots of those results
+# Make plots of those results - NPP
+
 fig, ax = plt.subplots()
-ax.plot(EBF2['annual_npp'][:, 1])
+for i in range(0, 5):
+    ax.plot(EBF2['annual_npp'][:, i])
 
-ax.set_xlim(npp_min_list[0], npp_max_list[0])
-ax.set_ylim(gpp_min_list[0], gpp_max_list[0])
-ax.set_ylabel('Daily GPP (kg C/m2/day)')
-ax.set_xlabel('Daily NPP (kg C/m2/day)')
-plt.title('NPP vs GPP, EBF')
+ax.set_ylabel('Annual NPP (kg C/m2/day)')
+ax.set_xlabel('x percent of a given parameter')
+ax.legend(['SWRad', 'Tavg', 'VPD', 'Fpar', 'LAI'], loc='upper left')
+plt.title('Annual NPP variation with a range of parameter values')
 
-testfile = vegtype2
-for i in range(1, 101):
-    print(i)
-    # LAI
-    #testfile['LAI'] *= ((1 + (i - 1)) / 100)
+# Make plots of those results - GPP
+fig, ax = plt.subplots()
+for i in range(0, 5):
+    ax.plot(EBF2['annual_gpp'][:, i])
 
+ax.set_ylabel('Annual GPP (kg C/m2/day)')
+ax.set_xlabel('x percent of a given parameter')
+ax.legend(['SWRad', 'Tavg', 'VPD', 'Fpar', 'LAI'], loc='upper left')
+plt.title('Annual GPP variation with a range of parameter values')
+
+# Zoom into VPD curve
+plt.plot(EBF2['annual_gpp'][:, 2])
