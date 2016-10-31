@@ -244,6 +244,9 @@ sns.distplot(CL['daily_npp'])
 ax.set_ylabel('Modeled Density')
 ax.set_xlabel('Daily NPP (kg C/m2/day)')
 plt.title('Daily NPP distribution by vegetation types')
+plt.legend(['EBF', 'OSL', 'CL'])
+plt.savefig('./figures/density_compare_npp.png', bbox_inches='tight', dpi=300)
+
 
 # Obtain absolute min and max for the plot x axis (GPP)
 gpp_min_list = np.array((EBF['daily_gpp'].min(), OSL['daily_gpp'].min(), CL['daily_gpp'].min()))
@@ -271,6 +274,17 @@ ax.set_ylabel('Modeled Density')
 ax.set_xlabel('Daily GPP (kg C/m2/day)')
 plt.title('Daily GPP distribution by vegetation types')
 
+# Or use seaborn
+ax = sns.distplot(EBF['daily_gpp'])
+sns.distplot(OSL['daily_gpp'])
+sns.distplot(CL['daily_gpp'])
+ax.set_ylabel('Modeled Density')
+ax.set_xlabel('Daily GPP (kg C/m2/day)')
+plt.title('Daily GPP distribution by vegetation types')
+plt.legend(['EBF', 'OSL', 'CL'])
+plt.savefig('./figures/density_compare_gpp.png', bbox_inches='tight', dpi=300)
+
+
 # PLOTS 2) Daily values (MR|NPP|GPP) vs Date
 
 def daily_plotter(veg1, veg2, veg3, feature, feature_label):
@@ -283,6 +297,7 @@ def daily_plotter(veg1, veg2, veg3, feature, feature_label):
     ax.legend(loc='upper right')
     ax.set_ylabel('Daily ' + feature_label + ' (kg C/m2/day)')
     ax.set_xlabel('Day of year')
+    plt.savefig('./figures/' + feature + '.png', bbox_inches='tight', dpi=300)
 
 daily_plotter('EBF', 'OSL', 'CL', 'daily_mr', 'MR')
 daily_plotter('EBF', 'OSL', 'CL', 'daily_npp', 'NPP')
@@ -303,8 +318,13 @@ plt.title('NPP vs GPP, EBF')
 
 # OR USING SEABORN...Regression plot, or joint plot
 sns.regplot(EBF['daily_npp'], EBF['daily_gpp'])
+
+sns.jointplot(EBF['daily_npp'], EBF['daily_gpp'], kind='reg')
+plt.savefig('./figures/npp_vs_gpp_EBF.png', bbox_inches='tight', dpi=300)
 sns.jointplot(OSL['daily_npp'], OSL['daily_gpp'], kind='reg')
+plt.savefig('./figures/npp_vs_gpp_OSL.png', bbox_inches='tight', dpi=300)
 sns.jointplot(CL['daily_npp'], CL['daily_gpp'], kind='reg')
+plt.savefig('./figures/npp_vs_gpp_CL.png', bbox_inches='tight', dpi=300)
 
 # Changing some variables to compare the results
 
@@ -318,7 +338,7 @@ def change_input(input, lut_file):
     # Loop over different values, find a more efficient way to do this
     for i in range(1, 102):
         # LAI
-        input2 = input.copy()
+        input2 = input.copy() # NEEDED in pandas to avoid modifying the original
         input2['LAI'] *= (1 + (i - 1) / 100)
         pem_output = pem(input2, lut_file)
         annual_npp[i - 1, 4] = pem_output['annual_npp']
@@ -360,9 +380,10 @@ for i in range(0, 5):
     ax.plot(EBF2['annual_npp'][:, i])
 
 ax.set_ylabel('Annual NPP (kg C/m2/day)')
-ax.set_xlabel('x percent of a given parameter')
+ax.set_xlabel('Percent of a given parameter')
 ax.legend(['SWRad', 'Tavg', 'VPD', 'Fpar', 'LAI'], loc='upper left')
 plt.title('Annual NPP variation with a range of parameter values')
+plt.savefig('./figures/NPP_param_variations_EBF.png', bbox_inches='tight', dpi=300)
 
 # Make plots of those results - GPP
 fig, ax = plt.subplots()
@@ -370,9 +391,15 @@ for i in range(0, 5):
     ax.plot(EBF2['annual_gpp'][:, i])
 
 ax.set_ylabel('Annual GPP (kg C/m2/day)')
-ax.set_xlabel('x percent of a given parameter')
+ax.set_xlabel('Percent of a given parameter')
 ax.legend(['SWRad', 'Tavg', 'VPD', 'Fpar', 'LAI'], loc='upper left')
 plt.title('Annual GPP variation with a range of parameter values')
+plt.savefig('./figures/GPP_param_variations_EBF.png', bbox_inches='tight', dpi=300)
 
 # Zoom into VPD curve
+ax.set_ylabel('Annual GPP (kg C/m2/day)')
+ax.set_xlabel('Percent of VPD')
 plt.plot(EBF2['annual_gpp'][:, 2])
+plt.title('Zoom into VPD curve')
+plt.savefig('./figures/npp_vs_gpp_CL.png', bbox_inches='tight', dpi=300)
+
