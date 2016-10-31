@@ -372,34 +372,35 @@ def change_input(input, lut_file):
 
 
 EBF2 = change_input(vegtype2, lutfile)
+OSL2 = change_input(vegtype9, lutfile)
+CL2 = change_input(vegtype11, lutfile)
 
-# Make plots of those results - NPP
+# Make plots of those results
 
-fig, ax = plt.subplots()
-for i in range(0, 5):
-    ax.plot(EBF2['annual_npp'][:, i])
+def change_input_plotter(input, value, vegname):
+    """ Plots the trajectories of GPP and NPP for multiple values of input variables, for
+        each of the types of vegetation analyzed"""
+    fig, ax = plt.subplots()
+    for i in range(0, 5):
+        ax.plot(input['annual_' + value][:, i])
 
-ax.set_ylabel('Annual NPP (kg C/m2/day)')
-ax.set_xlabel('Percent of a given parameter')
-ax.legend(['SWRad', 'Tavg', 'VPD', 'Fpar', 'LAI'], loc='upper left')
-plt.title('Annual NPP variation with a range of parameter values')
-plt.savefig('./figures/NPP_param_variations_EBF.png', bbox_inches='tight', dpi=300)
+    ax.set_ylabel('Annual ' + value + ' (kg C/m2/day)')
+    ax.set_xlabel('Percent of a given parameter')
+    ax.legend(['SWRad', 'Tavg', 'VPD', 'Fpar', 'LAI'], loc='upper left')
+    plt.title('Annual ' + value + ' variation with a range of parameter values - ' + vegname)
+    plt.savefig('./figures/' + value + '_param_variations_' + vegname + '.png', bbox_inches='tight', dpi=300)
 
-# Make plots of those results - GPP
-fig, ax = plt.subplots()
-for i in range(0, 5):
-    ax.plot(EBF2['annual_gpp'][:, i])
-
-ax.set_ylabel('Annual GPP (kg C/m2/day)')
-ax.set_xlabel('Percent of a given parameter')
-ax.legend(['SWRad', 'Tavg', 'VPD', 'Fpar', 'LAI'], loc='upper left')
-plt.title('Annual GPP variation with a range of parameter values')
-plt.savefig('./figures/GPP_param_variations_EBF.png', bbox_inches='tight', dpi=300)
+change_input_plotter(EBF2, 'npp', 'EBF')
+change_input_plotter(OSL2, 'npp', 'OSL')
+change_input_plotter(CL2, 'npp', 'CL')
+change_input_plotter(EBF2, 'gpp', 'EBF')
+change_input_plotter(OSL2, 'gpp', 'OSL')
+change_input_plotter(CL2, 'gpp', 'CL')
 
 # Zoom into VPD curve
 ax.set_ylabel('Annual GPP (kg C/m2/day)')
 ax.set_xlabel('Percent of VPD')
 plt.plot(EBF2['annual_gpp'][:, 2])
-plt.title('Zoom into VPD curve')
-plt.savefig('./figures/npp_vs_gpp_CL.png', bbox_inches='tight', dpi=300)
+plt.title('Zoom into VPD curve - annual GPP - EBF')
+plt.savefig('./figures/vpd_zoom_EBF.png', bbox_inches='tight', dpi=300)
 
