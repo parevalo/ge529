@@ -176,7 +176,7 @@ def fix_tables(vegfile):
     """ Fix dtypes and missing values"""
     # Fix dtype for LAI and Fpar
     vegfile['LAI'] = pd.to_numeric(vegfile['LAI'], errors='coerce')
-    vegfile['Fpar'] = pd.to_numeric(vegfile['LAI'], errors='coerce')
+    vegfile['Fpar'] = pd.to_numeric(vegfile['Fpar'], errors='coerce')
     # Replicate monthly mean to daily
     month = (31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
     # fpar and lai are monthly, make them daily. Reset index, needed for updating
@@ -316,40 +316,46 @@ def change_input(input, lut_file):
     annual_gpp = np.zeros((101, 5))
 
     # Loop over different values, find a more efficient way to do this
-    for i in range(1, 101):
+    for i in range(1, 102):
         # LAI
-        input['LAI'] *= ((1 + (i - 1)) / 100)
-        pem_output = pem(input, lut_file)
+        input2 = input.copy()
+        input2['LAI'] *= (1 + (i - 1) / 100)
+        pem_output = pem(input2, lut_file)
         annual_npp[i - 1, 4] = pem_output['annual_npp']
         annual_gpp[i - 1, 4] = pem_output['annual_gpp']
         # Fpar
-        input['Fpar'] *= ((1 + (i - 1)) / 100)
-        pem_output = pem(input, lut_file)
+        input2 = input.copy()
+        input2['Fpar'] *= (1 + (i - 1) / 100)
+        pem_output = pem(input2, lut_file)
         annual_npp[i - 1, 3] = pem_output['annual_npp']
         annual_gpp[i - 1, 3] = pem_output['annual_gpp']
         # VPD
-        input['VPD'] *= ((1 + (i - 1)) / 100)
-        pem_output = pem(input, lut_file)
+        input2 = input.copy()
+        input2['VPD'] *= (1 + (i - 1) / 100)
+        pem_output = pem(input2, lut_file)
         annual_npp[i - 1, 2] = pem_output['annual_npp']
         annual_gpp[i - 1, 2] = pem_output['annual_gpp']
         # Tavg
-        input['Tavg'] *= ((1 + (i - 1)) / 100)
-        pem_output = pem(input, lut_file)
+        input2 = input.copy()
+        input2['Tavg'] *= (1 + (i - 1) / 100)
+        pem_output = pem(input2, lut_file)
         annual_npp[i - 1, 1] = pem_output['annual_npp']
         annual_gpp[i - 1, 1] = pem_output['annual_gpp']
         # SWRad
-        input['SWRad'] *= ((1 + (i - 1)) / 100)
-        pem_output = pem(input, lut_file)
+        input2 = input.copy()
+        input2['SWRad'] *= (1 + (i - 1) / 100)
+        pem_output = pem(input2, lut_file)
         annual_npp[i - 1, 0] = pem_output['annual_npp']
         annual_gpp[i - 1, 0] = pem_output['annual_gpp']
 
-    return {'annual_npp': annual_npp, 'annual_gpp': annual_gpp, 'input': input}
+    return {'annual_npp': annual_npp, 'annual_gpp': annual_gpp, 'input': input, 'input2': input2}
+
 
 EBF2 = change_input(vegtype2, lutfile)
 
 # Make plots of those results
 fig, ax = plt.subplots()
-ax.plot(EBF2['annual_npp'][:, 3])
+ax.plot(EBF2['annual_npp'][:, 1])
 
 ax.set_xlim(npp_min_list[0], npp_max_list[0])
 ax.set_ylim(gpp_min_list[0], gpp_max_list[0])
@@ -359,6 +365,7 @@ plt.title('NPP vs GPP, EBF')
 
 testfile = vegtype2
 for i in range(1, 101):
+    print(i)
     # LAI
-    testfile['LAI'] *= ((1 + (i - 1)) / 100)
+    #testfile['LAI'] *= ((1 + (i - 1)) / 100)
 
