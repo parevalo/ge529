@@ -104,13 +104,17 @@ colorbar
 LC_08 = getLC(2008);
 LC_10 = getLC(2010);
 
+% Get weights for MODIS and TRMM (needed for the python script)
+modis_weight = calc_area(0.05, 3600, 7200, 'modis_cell_size');
+trmm_weight = calc_area(0.25, 400, 1440, 'trmm_cell_size');
+
 % Histograms of EVI over forest taking areas weighted by pixel area
 
 anomaly_2008(LC_08 ~= 1) = 0;
 anomaly_2008(isnan(anomaly_2008)) = 0;
 anomaly_2008(anomaly_2008 < -10 | anomaly_2008 > 10) = 0;
 a08 = anomaly_2008(anomaly_2008 ~=0);
-wt_08 = amazon_cellwt(anomaly_2008 ~=0);
+wt_08 = modis_weight(anomaly_2008 ~=0);
 [counts_08, centers_08] = histwc(a08, wt_08 , 500);
 bar(centers_08, counts_08, 'EdgeColor', 'blue');
 
@@ -119,9 +123,10 @@ anomaly_2010(LC_10 ~= 1)=0;
 anomaly_2010(isnan(anomaly_2010)) = 0;
 anomaly_2010(anomaly_2010 < -10 | anomaly_2010 > 10) = 0;
 a10 = anomaly_2010(anomaly_2010 ~=0);
-wt_10 = amazon_cellwt(anomaly_2010 ~=0);
+wt_10 = modis_weight(anomaly_2010 ~=0);
 [counts_10, centers_10] = histwc(a10, wt_10 , 500);
 bar(centers_10, counts_10, 'EdgeColor', 'red');
+
 
 
 % Save fig
