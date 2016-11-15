@@ -5,7 +5,9 @@ from matplotlib import pyplot as plt
 # Script to plot the time series of mean dry-season precipitation
 # and anomalies
 
-path = '/projectnb/landsat/users/parevalo/ge529/3B43'
+#path = '/projectnb/landsat/users/parevalo/ge529/3B43'
+path = '/home/paulo/ge529/raster/data'
+
 years = range(2002, 2012)
 
 def get_image(dir, year, month):
@@ -37,10 +39,10 @@ def calc_anomaly(period, year):
     
     return anomaly
 
-def save_img(array, year, suffix, vmin, vmax):
+def save_img(array, year, suffix):
     """ Save image of year precipitation or anomaly"""
-    outfile = 'figures/' + str(year) + suffix
-    plt.imshow(array, vmin=vmin, vmax=vmax)
+    outfile = '/home/paulo/ge529/drought/figures/' + str(year) + suffix
+    plt.imshow(array)
     plt.savefig(outfile)
 
 # Get images and do the calculations
@@ -53,12 +55,12 @@ for i, y in enumerate(years):
 
     precip[:, :, i] = calc_mean(jul, ago, sept)
 
-anomaly_08 = calc_anomaly(2008, precip)
-anomaly_10 = calc_anomaly(2010, precip)
+anomaly_08 = calc_anomaly(precip, 2008)
+anomaly_10 = calc_anomaly(precip, 2010)
 
-save_img(anomaly_08, 2008, '_anomaly.png', 1.5, 1.5)
-save_img(anomaly_10, 2010, '_anomaly.png', 1.5, 1.5)
+save_img(anomaly_08, 2008, '_anomaly.png')
+save_img(anomaly_10, 2010, '_anomaly.png')
 
 
-
+plt.imshow(anomaly_08)
 
