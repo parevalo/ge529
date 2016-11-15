@@ -70,11 +70,11 @@ end
 save('annual_summer_EVI_means.mat', 'annual_vi_cube')
 
 % Calculate anomalies for 2008 and 2010, removing those years prior to
-% calculating the mean and sd
+% calculating the mean and sd on the temporal axis, per pixel
 cube_wo2008 = annual_vi_cube;
 cube_wo2010 = annual_vi_cube;
-cube_wo2008(:,:,7) = [];
-cube_wo2010(:,:,9) = [];
+cube_wo2008(:,:,7) = NaN; %[];
+cube_wo2010(:,:,9) = NaN; %[];
 intann_mean_2008 = nanmean(cube_wo2008,3);
 intann_mean_2010 = nanmean(cube_wo2010,3);
 intann_sd_2008 = nanstd(cube_wo2008, 1, 3);
@@ -86,25 +86,43 @@ anomaly_2010 = (annual_vi_cube(:,:,9) - intann_mean_2010)./intann_sd_2010;
 anomaly_2008_geo = flipud(anomaly_2008);
 anomaly_2010_geo = flipud(anomaly_2010);
 
+Rlatlon = makerefmat('RasterSize', [600 700], ...
+        'Latlim', [-20 10], 'Lonlim', [-80 -45]);
+
 geoshow(anomaly_2008_geo, Rlatlon, 'DisplayType', 'surface')
 colormap parula
 caxis([-2,2])
 colorbar
 
+figure
 geoshow(anomaly_2010_geo, Rlatlon, 'DisplayType', 'surface')
 colormap parula
 caxis([-2,2])
 colorbar
 
-% Histograms of EVI over forest taking areas into account, weighted by
-% pixel area
-weights = amazon_cellwt / mean(amazon_cellwt(:));
+% Get forest cover per year
+LC_08 = getLC(2008);
+LC_10 = getLC(2010);
 
-anom_2008_wt = anomaly_2008 .* weights;
-h08 = histogram(anom_2008_wt(LC_Amazon_aggreg == 1), 1000)
-axis([-5, 5, -Inf, Inf])
+% Histograms of EVI over forest taking areas weighted by pixel area
+
+anomaly_2008(LC_08 ~= 1) = 0;
+anomaly_2008(isnan(anomaly_2008)) = 0;
+anomaly_2008(anomaly_2008 < -10 | anomaly_2008 > 10) = 0;
+a08 = anomaly_2008(anomaly_2008 ~=0);
+wt_08 = amazon_cellwt(anomaly_2008 ~=0);
+[counts_08, centers_08] = histwc(a08, wt_08 , 500);
+bar(centers_08, counts_08, 'EdgeColor', 'blue');
 
 figure
-anom_2010_wt = anomaly_2010 .* weights;
-h10 = histogram(anom_2010_wt(LC_Amazon_aggreg == 1))
-axis([-1, 1, -Inf, Inf])
+anomaly_2010(LC_10 ~= 1)=0;
+anomaly_2010(isnan(anomaly_2010)) = 0;
+anomaly_2010(anomaly_2010 < -10 | anomaly_2010 > 10) = 0;
+a10 = anomaly_2010(anomaly_2010 ~=0);
+wt_10 = amazon_cellwt(anomaly_2010 ~=0);
+[counts_10, centers_10] = histwc(a10, wt_10 , 500);
+bar(centers_10, counts_10, 'EdgeColor', 'red');
+
+
+% Save fig
+% print(fig,'-dpng','-r600',filename);
