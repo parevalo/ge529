@@ -88,6 +88,16 @@ for i, y in enumerate(years):
     precip[:, :, i] = calc_mean(jul, ago, sept)
     save_img(precip[:, :, i], y, '_mean_precipitation.png', 'Precipitation (mm $h^{-1}$)')
 
+# Plot all years at once
+fig = plt.figure(figsize=(20, 20))
+for i in range(9):
+    ax = fig.add_subplot(3, 3, i+1)
+    cax = ax.imshow(precip[:,:,i], cmap=plt.get_cmap('viridis'), extent=[-80, -45, -20, 10])
+    cbar = fig.colorbar(cax, orientation='vertical', fraction=0.046, pad=0.04)
+    ax.set_title('Mean precipitation (mm $h^{-1}$)' + " - " + str(years[i]))
+
+plt.savefig('/home/paulo/ge529/drought/figures/Multi_year_mean_precipitation.png', bbox_inches='tight')
+
 # Calculate and save anomalies
 anomaly_08 = calc_anomaly(precip, 2008)
 anomaly_10 = calc_anomaly(precip, 2010)
@@ -116,19 +126,15 @@ scaled_wt_10 = minmax_scaler.fit_transform(masked_weights10)
 
 # Create weighted histogram for 2008 and 2010
 
-plt.figure(0)
-plt.hist(masked_precip08, weights=scaled_wt_08)
-plt.ylabel('Area weighted frequency')
-plt.xlabel('Precipitation (mm $h^{-1}$)')
-plt.title("Area weighted histogram for precipitation in dry months, 2008")
-plt.savefig('/home/paulo/ge529/drought/figures/precip_hist_08.png')
+fig, ax = plt.subplots()
+ax.hist(masked_precip08, weights=scaled_wt_08, alpha=0.5, label='2008', color='blue')
+ax.hist(masked_precip10, weights=scaled_wt_10, alpha=0.5, label='2010', color='red')
+ax.set_ylabel('Area weighted frequency')
+ax.set_xlabel('Precipitation (mm $h^{-1}$)')
+plt.legend(loc='upper right')
+plt.title("Area weighted histograms for precipitation in dry months")
+plt.savefig('/home/paulo/ge529/drought/figures/precip_histogram_comparison.png', bbox_inches='tight')
 
-plt.figure(1)
-plt.hist(masked_precip10, weights=scaled_wt_10)
-plt.ylabel('Area weighted frequency')
-plt.xlabel('Precipitation (mm $h^{-1}$)')
-plt.title("Area weighted histogram for precipitation in dry months, 2008")
-plt.savefig('/home/paulo/ge529/drought/figures/precip_hist_10.png')
 
 # Plot TS for entire region?
 scaled_wt = minmax_scaler.fit_transform(wt)
@@ -218,7 +224,6 @@ mean_precip = np.zeros(12)
 for i, m in enumerate(months):
     mean_precip[i] = np.nanmean(precip_cube[:, i, :, :])
 
-plt.bar(months, mean_precip*24*30)
 
 #Plot LAI, PAR and precipitation together
 fig, ax = plt.subplots()
