@@ -76,7 +76,7 @@ def save_img(array, year, suffix, title):
     cax = ax.imshow(array, cmap=plt.get_cmap('viridis'), extent=[-80, -45, -20, 10])
     cbar = fig.colorbar(cax, orientation='vertical')
     ax.set_title(title + " - " + str(year))
-    plt.savefig(outfile)
+    plt.savefig(outfile, bbox_inches='tight')
     plt.close(fig)
 
 # Get images, calculate mean and save images
@@ -86,7 +86,7 @@ for i, y in enumerate(years):
     ago = get_trmm(path, y, 8)
     sept = get_trmm(path, y, 9)
     precip[:, :, i] = calc_mean(jul, ago, sept)
-    save_img(precip[:, :, i], y, '_mean.png', 'Precipitation (mm $h^{-1}$)')
+    save_img(precip[:, :, i], y, '_mean_precipitation.png', 'Precipitation (mm $h^{-1}$)')
 
 # Calculate and save anomalies
 anomaly_08 = calc_anomaly(precip, 2008)
