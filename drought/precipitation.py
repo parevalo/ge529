@@ -73,7 +73,7 @@ def save_img(array, year, suffix, title):
     """ Save image of year precipitation or anomaly"""
     outfile = '/home/paulo/ge529/drought/figures/' + str(year) + suffix
     fig, ax = plt.subplots()
-    cax = ax.imshow(array, cmap=plt.get_cmap('viridis'))
+    cax = ax.imshow(array, cmap=plt.get_cmap('viridis'), extent=[-80, -45, -20, 10])
     cbar = fig.colorbar(cax, orientation='vertical')
     ax.set_title(title + " - " + str(year))
     plt.savefig(outfile)
@@ -261,5 +261,5 @@ axes[2].set_ylim(0, 800)
 for ax, color in zip(axes, colors):
     ax.tick_params(axis='y', colors=color)
 
-plt.show()
+plt.savefig('/home/paulo/ge529/drought/figures/precip_lai_par.png')
 
