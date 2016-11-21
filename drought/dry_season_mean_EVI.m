@@ -5,8 +5,8 @@
 
 rows=3600;
 cols=7200;
-
-path_MOD13C2 = '/projectnb/landsat/users/parevalo/ge529/MOD13C2/'; % path to your MOD13C2 files
+path_MOD13C2 = '/projectnb/landsat/users/bullocke/GE529/HW2/GE529_Jian_Lab1_Codes/MOD13C2.006/';
+%path_MOD13C2 = '/projectnb/landsat/users/parevalo/ge529/MOD13C2/'; % path to your MOD13C2 files
 
 months_non_leap = [182,213,244];
 % Create empty array to store annual(quarter) results
@@ -62,23 +62,27 @@ for year_i = 3:12
     amazon_vi_jas = vi_dry_season(1601:2200,2001:2700);
     annual_vi_cube(:,:,year_i-2) = amazon_vi_jas;
     amazon_vi_jas_file = [path_MOD13C2,'MOD13C2.Amazon.Dry_Season_',num2str(year_i+1999),'.mat'];
-    save(amazon_vi_jas_file,'amazon_vi_jas');
+    %save(amazon_vi_jas_file,'amazon_vi_jas');
 
 end 
+
 
 % Save cube of annual summer quarter means
 save('annual_summer_EVI_means.mat', 'annual_vi_cube')
 
 % Calculate anomalies for 2008 and 2010, removing those years prior to
 % calculating the mean and sd on the temporal axis, per pixel
+
 cube_wo2008 = annual_vi_cube;
 cube_wo2010 = annual_vi_cube;
 cube_wo2008(:,:,7) = NaN; %[];
 cube_wo2010(:,:,9) = NaN; %[];
 intann_mean_2008 = nanmean(cube_wo2008,3);
 intann_mean_2010 = nanmean(cube_wo2010,3);
-intann_sd_2008 = nanstd(cube_wo2008, 1, 3);
-intann_sd_2010 = nanstd(cube_wo2010, 1, 3);
+%intann_sd_2008(isnan(intann_sd_2008)) = 0;
+%intann_sd_2010(isnan(intann_sd_2010)) = 0;
+intann_sd_2008 = nanstd(cube_wo2008, 0, 3);
+intann_sd_2010 = nanstd(cube_wo2010, 0, 3);
 anomaly_2008 = (annual_vi_cube(:,:,7) - intann_mean_2008)./intann_sd_2008;
 anomaly_2010 = (annual_vi_cube(:,:,9) - intann_mean_2010)./intann_sd_2010;
 
@@ -93,40 +97,45 @@ geoshow(anomaly_2008_geo, Rlatlon, 'DisplayType', 'surface')
 colormap parula
 caxis([-2,2])
 colorbar
+saveas(gcf, './figures/anomaly_2008_geo.png')
 
 figure
 geoshow(anomaly_2010_geo, Rlatlon, 'DisplayType', 'surface')
 colormap parula
 caxis([-2,2])
 colorbar
+saveas(gcf, './figures/anomaly_2010_geo.png')
 
 % Get forest cover per year
 LC_08 = getLC(2008);
 LC_10 = getLC(2010);
 
 % Get weights for MODIS and TRMM (needed for the python script)
-modis_weight = calc_area(0.05, 3600, 7200, 'modis_cell_size');
-trmm_weight = calc_area(0.25, 400, 1440, 'trmm_cell_size');
+%load('modis_cell_size.mat');
+modis_weight = amazon_cellwt;
+%modis_weight = calc_area(0.05, 3600, 7200, 'modis_cell_size');
+%trmm_weight = calc_area(0.25, 400, 1440, 'trmm_cell_size');
 
 % Histograms of EVI over forest taking areas weighted by pixel area
 
 anomaly_2008(LC_08 ~= 1) = 0;
-anomaly_2008(isnan(anomaly_2008)) = 0;
+%anomaly_2008(isnan(anomaly_2008)) = 0;
 anomaly_2008(anomaly_2008 < -10 | anomaly_2008 > 10) = 0;
 a08 = anomaly_2008(anomaly_2008 ~=0);
 wt_08 = modis_weight(anomaly_2008 ~=0);
-[counts_08, centers_08] = histwc(a08, wt_08 , 500);
-bar(centers_08, counts_08, 'EdgeColor', 'blue');
+[counts_08, centers_08] = histwc(a08, wt_08 , 100);
+bar(centers_08, counts_08, 'EdgeColor', 'red', 'FaceColor', 'red');
 
-figure
+hold on
+%figure
 anomaly_2010(LC_10 ~= 1)=0;
-anomaly_2010(isnan(anomaly_2010)) = 0;
+%anomaly_2010(isnan(anomaly_2010)) = 0;
 anomaly_2010(anomaly_2010 < -10 | anomaly_2010 > 10) = 0;
 a10 = anomaly_2010(anomaly_2010 ~=0);
 wt_10 = modis_weight(anomaly_2010 ~=0);
-[counts_10, centers_10] = histwc(a10, wt_10 , 500);
-bar(centers_10, counts_10, 'EdgeColor', 'red');
-
+[counts_10, centers_10] = histwc(a10, wt_10 , 100);
+bar(centers_10, counts_10, 'EdgeColor', 'black', 'FaceColor', 'none');
+saveas(gcf, './figures/anomaly_histograms.png')
 
 
 % Save fig
